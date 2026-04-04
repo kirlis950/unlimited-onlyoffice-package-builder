@@ -41,6 +41,7 @@ BINARIES_ONLY="false"
 DEB_ONLY="false"
 
 UPSTREAM_ORGANIZATION="ONLYOFFICE"
+PATCHES_ORGANIZATION="btactic-oo"
 
 SERVER_CUSTOM_COMMITS="9d2caf9f564b1801f7c23ca04be926fa436a3a3f"
 WEB_APPS_CUSTOM_COMMITS=""
@@ -167,18 +168,19 @@ prepare_custom_repo() {
   shift
   # Rest of arguments are commits to cherry-pick in order
 
-  git clone https://github.com/${_UNLIMITED_ORGANIZATION}/${_REPO}
+  git clone https://github.com/${UPSTREAM_ORGANIZATION}/${_REPO}
   cd ${_REPO}
-  git remote add upstream-origin https://github.com/${UPSTREAM_ORGANIZATION}/${_REPO}
-
-  git checkout master
-  git pull upstream-origin master
   git fetch --all --tags
   git checkout tags/${_TAG} -b ${_TAG}-custom
 
   # Hard-code temp git user.name and user.email for this local cherry-picked commit
   git config user.name 'CherryPick User'
   git config user.email 'cherrypick@btacticoo.com'
+
+  if [ "$#" -gt 0 ]; then
+    git remote add patches-origin https://github.com/${PATCHES_ORGANIZATION}/${_REPO}
+    git fetch patches-origin
+  fi
 
   while [ "$#" -gt 0 ]; do
     _ncommit=$1
